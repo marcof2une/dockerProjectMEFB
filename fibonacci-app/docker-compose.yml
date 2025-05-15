@@ -1,20 +1,22 @@
-version: '3.8'
-
 services:
   frontend:
     build:
-      context: ./docker
-      dockerfile: Dockerfile.frontend
+      context: .
+      dockerfile: docker/Dockerfile.frontend
     ports:
       - "3000:3000"
-    depends_on:
-      - nginx
-
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm run build && npm start"
+    
   nginx:
     build:
-      context: ./docker
-      dockerfile: Dockerfile.nginx
+      context: .
+      dockerfile: docker/Dockerfile.nginx
     ports:
-      - "80:80"
+      - "70:70"
+    volumes:
+      - ./frontend/build:/usr/share/nginx/html
     depends_on:
       - frontend
