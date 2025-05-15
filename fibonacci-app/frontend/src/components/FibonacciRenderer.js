@@ -25,17 +25,7 @@ const FibonacciGenerator = () => {
     };
 
     return (
-        <div>
-            <h1>Fibonacci Sequence Generator</h1>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="number"
-                    value={input}
-                    onChange={handleInputChange}
-                    placeholder="Enter a number"
-                />
-                <button type="submit">Generate</button>
-            </form>
+        <div className="fibonacci-generator">
             <FibonacciRenderer sequence={sequence} />
         </div>
     );
@@ -48,7 +38,7 @@ const FibonacciRenderer = () => {
     const timerRef = useRef(null);
     const fibRef = useRef({
         prev1: 10,
-        prev2: 15
+        prev2: 5
     });
 
     useEffect(() => {
@@ -62,10 +52,10 @@ const FibonacciRenderer = () => {
         setCurrentNumber(15);
         fibRef.current = {
             prev1: 10,
-            prev2: 15
+            prev2: 5
         };
         setIsGenerating(true);
-        let generatingTresholdCount = 300;
+        let generatingThresholdCount = 300;
         let currentCount = 1;
         
         timerRef.current = setInterval(() => {
@@ -94,7 +84,7 @@ const FibonacciRenderer = () => {
                     };
                     
                     setCurrentNumber(nextFib);
-                }, generatingTresholdCount); // Faster interval for larger numbers
+                }, generatingThresholdCount);
             }
             
         }, 800); // Initial interval
