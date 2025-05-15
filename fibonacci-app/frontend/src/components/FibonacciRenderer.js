@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-const FibonacciRenderer = () => {
+const FibonacciGenerator = () => {
     const [input, setInput] = useState('');
     const [sequence, setSequence] = useState([]);
 
@@ -36,12 +36,109 @@ const FibonacciRenderer = () => {
                 />
                 <button type="submit">Generate</button>
             </form>
-            <div>
-                <h2>Fibonacci Sequence:</h2>
-                <p>{sequence.join(', ')}</p>
-            </div>
+            <FibonacciRenderer sequence={sequence} />
         </div>
     );
 };
 
-export default FibonacciRenderer;
+const FibonacciRenderer = () => {
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [currentNumber, setCurrentNumber] = useState(null);
+    const [count, setCount] = useState(0);
+    const timerRef = useRef(null);
+    generatingTresholdCount = 300;
+    const fibRef = useRef({
+        prev1: 1,
+        prev2: 0
+    });
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, []);
+
+    const startGenerating = () => {
+        setCount(1);
+        setCurrentNumber(0);
+        fibRef.current = { prev1: 1, prev2: 0 };
+        setIsGenerating(true);
+        
+        let currentCount = 1;
+        
+        timerRef.current = setInterval(() => {
+            currentCount++;
+            setCount(currentCount);
+            
+            const nextFib = fibRef.current.prev1 + fibRef.current.prev2;
+            
+            fibRef.current = {
+                prev2: fibRef.current.prev1,
+                prev1: nextFib
+            };
+            
+            setCurrentNumber(currentCount === 2 ? 1 : nextFib);
+            
+            if (currentCount > 20 && timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = setInterval(() => {
+                    currentCount++;
+                    setCount(currentCount);
+                    
+                    const nextFib = fibRef.current.prev1 + fibRef.current.prev2;
+                    fibRef.current = {
+                        prev2: fibRef.current.prev1,
+                        prev1: nextFib
+                    };
+                    
+                    setCurrentNumber(nextFib);
+                }, generatingTresholdCount); // Faster interval for larger numbers
+            }
+            
+        }, 800); // Initial interval
+    };
+
+    const stopGenerating = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+        setIsGenerating(false);
+    };
+
+    const handleButtonClick = () => {
+        if (isGenerating) {
+            stopGenerating();
+        } else {
+            startGenerating();
+        }
+    };
+
+    return (
+        <div className="fibonacci-container">
+            <h1>Fibonacci Sequence Generator</h1>
+            
+            <div className="fibonacci-display">
+                {currentNumber !== null && (
+                    <div className="current-number">
+                        {currentNumber}
+                    </div>
+                )}
+                {count > 0 && (
+                    <div className="progress">
+                        Number {count} in sequence
+                    </div>
+                )}
+            </div>
+
+            <button 
+                className="generate-button"
+                onClick={handleButtonClick}
+            >
+                {isGenerating ? 'Stop' : 'Generate'}
+            </button>
+        </div>
+    );
+};
+
+export default FibonacciGenerator;
