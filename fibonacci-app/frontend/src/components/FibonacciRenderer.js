@@ -46,10 +46,9 @@ const FibonacciRenderer = () => {
     const [currentNumber, setCurrentNumber] = useState(null);
     const [count, setCount] = useState(0);
     const timerRef = useRef(null);
-    generatingTresholdCount = 300;
     const fibRef = useRef({
-        prev1: 1,
-        prev2: 0
+        prev1: 10,
+        prev2: 15
     });
 
     useEffect(() => {
@@ -60,10 +59,13 @@ const FibonacciRenderer = () => {
 
     const startGenerating = () => {
         setCount(1);
-        setCurrentNumber(0);
-        fibRef.current = { prev1: 1, prev2: 0 };
+        setCurrentNumber(15);
+        fibRef.current = {
+            prev1: 10,
+            prev2: 15
+        };
         setIsGenerating(true);
-        
+        let generatingTresholdCount = 300;
         let currentCount = 1;
         
         timerRef.current = setInterval(() => {
@@ -77,7 +79,7 @@ const FibonacciRenderer = () => {
                 prev1: nextFib
             };
             
-            setCurrentNumber(currentCount === 2 ? 1 : nextFib);
+            setCurrentNumber(nextFib);
             
             if (currentCount > 20 && timerRef.current) {
                 clearInterval(timerRef.current);
