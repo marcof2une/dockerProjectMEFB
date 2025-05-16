@@ -46,7 +46,19 @@
               "target": "Package",
               "version": "[20.1.3, )"
             },
+            "Selenium.WebDriver": {
+              "target": "Package",
+              "version": "[4.32.0, )"
+            },
+            "Selenium.WebDriver.GeckoDriver": {
+              "target": "Package",
+              "version": "[0.36.0, )"
+            },
             "System.Diagnostics.PerformanceCounter": {
+              "target": "Package",
+              "version": "[9.0.5, )"
+            },
+            "System.Management": {
               "target": "Package",
               "version": "[9.0.5, )"
             }

@@ -1,74 +1,54 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using PuppeteerSharp;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Support.UI;
+using GeneralPerformanceMeasurement.Models;
+using GeneralPerformanceMeasurement;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
-public class PerformanceResult
-{
-    public string Environment { get; set; }
-    public DateTime Timestamp { get; set; }
-    public string Url { get; set; }
-    public int TestDuration { get; set; }
-    public List<Metric> Metrics { get; set; }
-    public FpsStats FpsStats { get; set; }
-    public SystemMetrics SystemMetrics { get; set; }
-}
 
-public class Metric
+namespace GeneralPerformanceMeasurement
 {
-    public long Timestamp { get; set; }
-    public double ScriptDuration { get; set; }
-    public long JSHeapUsedSize { get; set; }
-}
-
-public class FpsStats
-{
-    public List<double> Values { get; set; }
-    public double Average { get; set; }
-    public double Min { get; set; }
-    public double Max { get; set; }
-}
-
-public class SystemMetrics
-{
-    public double CpuUsage { get; set; }
-    public double MemoryUsage { get; set; }
-}
-
-class PerformanceMeasurer
-{
-    public static async Task Main(string[] args)
+    public class PerformanceMeasurer
     {
-        var config = new {
-            Url = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:3000",
-            Environment = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? "local",
-            OutputDir = Environment.GetEnvironmentVariable("OUTPUT_DIR") ?? "./performance-data",
-            TestDuration = int.TryParse(Environment.GetEnvironmentVariable("TEST_DURATION"), out int td) ? td : 30000
-        };
-
-        Directory.CreateDirectory(config.OutputDir);
-
-        await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
-
-        var launchOptions = new LaunchOptions
+        public static async Task Main(string[] args)
         {
-            Headless = true,
-            Args = new[] { "--disable-gpu", "--no-sandbox", "--disable-setuid-sandbox" }
-        };
+            var config = new
+            {
+                Url = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:3000",
+                Environment = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? "local",
+                OutputDir = Environment.GetEnvironmentVariable("OUTPUT_DIR") ?? "./performance-data",
+                TestDuration = int.TryParse(Environment.GetEnvironmentVariable("TEST_DURATION"), out int td) ? td : 30000
+            };
 
-        using (var browser = await Puppeteer.LaunchAsync(launchOptions))
-        {
-            var page = await browser.NewPageAsync();
+            Directory.CreateDirectory(config.OutputDir);
 
-            // FPS Measurement
-            await page.EvaluateOnNewDocumentAsync(@"
+            var options = new FirefoxOptions();
+            options.AddArgument("--headless");
+
+            using var driver = new FirefoxDriver(options);
+            driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(120);
+
+            driver.Navigate().GoToUrl(config.Url);
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait.Until(d => d != null && 
+                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState")?.Equals("complete") == true);
+
+            // Inject FPS tracking code
+            ((IJavaScriptExecutor)driver).ExecuteScript(@"
                 window.fpsValues = [];
                 let lastFrameTimestamp = performance.now();
-                
                 function calculateFPS() {
                     const now = performance.now();
                     const fps = 1000 / (now - lastFrameTimestamp);
@@ -76,105 +56,80 @@ class PerformanceMeasurer
                     lastFrameTimestamp = now;
                     requestAnimationFrame(calculateFPS);
                 }
-                
                 requestAnimationFrame(calculateFPS);
             ");
 
-            await page.GoToAsync(config.Url, WaitUntilNavigation.Networkidle0);
-
             var metrics = new List<Metric>();
             var startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var systemMonitor = new SystemMonitor();
 
-            // Measurement loop
             for (int i = 0; i < config.TestDuration / 1000; i++)
             {
-                var pageMetrics = await page.MetricsAsync();
-                metrics.Add(new Metric {
-                    Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startTime,
-                    ScriptDuration = pageMetrics.ContainsKey("ScriptDuration") ? 
-                        Convert.ToDouble(pageMetrics["ScriptDuration"]) : 0,
-                    JSHeapUsedSize = pageMetrics.ContainsKey("JSHeapUsedSize") ? 
-                        Convert.ToInt64(pageMetrics["JSHeapUsedSize"]) : 0
-                });
+                var jsHeapSize = Convert.ToInt64(((IJavaScriptExecutor)driver).ExecuteScript(
+                    "return window.performance.memory ? window.performance.memory.usedJSHeapSize : 0"));
 
+                var scriptExecutionTime = Convert.ToDouble(((IJavaScriptExecutor)driver).ExecuteScript(@"
+                    const entries = performance.getEntriesByType('measure');
+                    let total = 0;
+                    for (const entry of entries) {
+                        total += entry.duration;
+                    }
+                    performance.clearMeasures();
+                    return total;
+                "));
+                
+                metrics.Add(new Metric 
+                {
+                    Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startTime,
+                    ScriptDuration = scriptExecutionTime,
+                    JSHeapUsedSize = jsHeapSize
+                });
+                
                 await Task.Delay(1000);
             }
 
-            // Collect system metrics
+            var systemMonitor = new SystemMonitor();
+
             var systemMetrics = systemMonitor.GetMetrics();
 
-            // Get FPS data
-            var fpsData = await page.EvaluateFunctionAsync<dynamic>("() => ({ values: window.fpsValues })");
-            
-            var result = new PerformanceResult {
-                Environment = config.Environment,
+            var fpsValuesArray = ((IJavaScriptExecutor)driver).ExecuteScript("return window.fpsValues") 
+                as IReadOnlyCollection<object>;
+                
+            List<double> fpsValues = new List<double>();
+            if (fpsValuesArray != null)
+            {
+                fpsValues = fpsValuesArray.Select(v => Convert.ToDouble(v)).ToList();
+            }
+
+            var result = new PerformanceResult
+            {
+                TestEnvironment = config.Environment,
                 Timestamp = DateTime.UtcNow,
                 Url = config.Url,
                 TestDuration = config.TestDuration,
                 Metrics = metrics,
-                FpsStats = new FpsStats {
-                    Values = ((IEnumerable<object>)fpsData.values).Select(Convert.ToDouble).ToList(),
-                    Average = ((IEnumerable<object>)fpsData.values).Select(Convert.ToDouble).Average(),
-                    Min = ((IEnumerable<object>)fpsData.values).Select(Convert.ToDouble).Min(),
-                    Max = ((IEnumerable<object>)fpsData.values).Select(Convert.ToDouble).Max()
-                },
+                FpsStats = fpsValues.Any() 
+                    ? new FpsStats
+                    {
+                        Values = fpsValues,
+                        Average = fpsValues.Average(),
+                        Min = fpsValues.Min(),
+                        Max = fpsValues.Max()
+                    } 
+                    : new FpsStats
+                    {
+                        Values = new List<double>(),
+                        Average = 0,
+                        Min = 0,
+                        Max = 0
+                    },
                 SystemMetrics = systemMetrics
             };
 
             var fileName = $"{config.Environment}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.json";
-            File.WriteAllText(Path.Combine(config.OutputDir, fileName), 
-                JsonConvert.SerializeObject(result, Formatting.Indented));
+            File.WriteAllText(
+                Path.Combine(config.OutputDir, fileName),
+                JsonConvert.SerializeObject(result, Formatting.Indented)
+            );
         }
-    }
-}
-
-public class SystemMonitor
-{
-    public SystemMetrics GetMetrics()
-    {
-        if (Environment.OSVersion.Platform == PlatformID.Unix)
-        {
-            return GetUnixMetrics();
-        }
-        return GetWindowsMetrics();
-    }
-
-    private SystemMetrics GetUnixMetrics()
-    {
-        var cpu = ExecuteShellCommand("top -bn1 | grep 'Cpu(s)' | awk '{print $2 + $4}'");
-        var mem = ExecuteShellCommand("free -m | awk '/Mem:/ {print $3/$2 * 100.0}'");
-        
-        return new SystemMetrics {
-            CpuUsage = double.TryParse(cpu, out var c) ? c : 0,
-            MemoryUsage = double.TryParse(mem, out var m) ? m : 0
-        };
-    }
-
-    private SystemMetrics GetWindowsMetrics()
-    {
-        var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-        var memCounter = new PerformanceCounter("Memory", "Available MBytes");
-        
-        cpuCounter.NextValue();
-        Thread.Sleep(1000);
-        
-        return new SystemMetrics {
-            CpuUsage = cpuCounter.NextValue(),
-            MemoryUsage = (1 - (memCounter.NextValue() / 
-                new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory * 1e-6)) * 100
-        };
-    }
-
-    private string ExecuteShellCommand(string command)
-    {
-        try
-        {
-            var psi = new ProcessStartInfo("bash", "-c \"" + command + "\"") {
-                RedirectStandardOutput = true
-            };
-            return Process.Start(psi).StandardOutput.ReadToEnd().Trim();
-        }
-        catch { return "0"; }
     }
 }
