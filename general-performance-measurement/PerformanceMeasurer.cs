@@ -27,7 +27,7 @@ namespace GeneralPerformanceMeasurement
             {
                 Url = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:3000",
                 Environment = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? "local",
-                OutputDir = Environment.GetEnvironmentVariable("OUTPUT_DIR") ?? "./performance-data",
+                OutputDir = Environment.GetEnvironmentVariable("OUTPUT_DIR") ?? "./results",
                 TestDuration = int.TryParse(Environment.GetEnvironmentVariable("TEST_DURATION"), out int td) ? td : 30000
             };
 

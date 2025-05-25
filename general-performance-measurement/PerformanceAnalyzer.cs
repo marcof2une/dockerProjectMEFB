@@ -11,8 +11,8 @@ namespace GeneralPerformanceMeasurement.Analysis
     {
         static void Main()
         {
-            var dockerDataPath = Environment.GetEnvironmentVariable("DOCKER_DATA_PATH") ?? "./docker-data";
-            var vmDataPath = Environment.GetEnvironmentVariable("VM_DATA_PATH") ?? "./vm-data";
+            var dockerDataPath = Environment.GetEnvironmentVariable("DOCKER_DATA_PATH") ?? "./docker-actions";
+            var vmDataPath = Environment.GetEnvironmentVariable("VM_DATA_PATH") ?? "./vm-actions";
 
             if (!Directory.Exists(dockerDataPath) || !Directory.Exists(vmDataPath))
             {
