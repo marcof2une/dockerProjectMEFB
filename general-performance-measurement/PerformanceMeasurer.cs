@@ -87,7 +87,7 @@ namespace GeneralPerformanceMeasurement
                 await Task.Delay(1000);
             }
 
-            var systemMonitor = new SystemMonitor();
+            var systemMonitor = new Models.GeneralPerformanceMeasurement.Monitors.SystemMonitor();
 
             var systemMetrics = systemMonitor.GetMetrics();
 

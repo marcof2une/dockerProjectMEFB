@@ -36,6 +36,11 @@ namespace GeneralPerformanceMeasurement.Models
     {
         public double CpuUsage { get; set; }
         public double MemoryUsage { get; set; }
+
+        public static implicit operator SystemResourceMetrics(SystemMetrics v)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // Analysis-related models
