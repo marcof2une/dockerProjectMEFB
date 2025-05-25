@@ -9,7 +9,7 @@ namespace GeneralPerformanceMeasurement.Analysis
 {
     class PerformanceAnalyzer
     {
-        static void Main()
+        public static void Main()
         {
             var dockerDataPath = Environment.GetEnvironmentVariable("DOCKER_DATA_PATH") ?? "./docker-actions";
             var vmDataPath = Environment.GetEnvironmentVariable("VM_DATA_PATH") ?? "./vm-actions";

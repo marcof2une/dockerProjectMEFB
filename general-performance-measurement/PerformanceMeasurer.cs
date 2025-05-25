@@ -14,8 +14,6 @@ using GeneralPerformanceMeasurement;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-
 
 namespace GeneralPerformanceMeasurement
 {
@@ -23,15 +21,29 @@ namespace GeneralPerformanceMeasurement
     {
         public static async Task Main(string[] args)
         {
+            if (!Directory.Exists("./docker-actions"))
+                Directory.CreateDirectory("./docker-actions");
+            
+            if (!Directory.Exists("./vm-actions"))
+                Directory.CreateDirectory("./vm-actions");
+
+            CreateInitialJsonIfNeeded("./docker-actions");
+            CreateInitialJsonIfNeeded("./vm-actions");
+
+            // Fix: Use args[1] instead of args[0] to get the environment
+            var environment = args.Length > 1 ? args[1] : "docker";
+            var outputDir = environment == "docker" ? "./docker-actions" : "./vm-actions";
+            
             var config = new
             {
                 Url = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:3000",
-                Environment = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? "local",
-                OutputDir = Environment.GetEnvironmentVariable("OUTPUT_DIR") ?? "./results",
+                Environment = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? environment,
+                OutputDir = Environment.GetEnvironmentVariable("OUTPUT_DIR") ?? outputDir,
                 TestDuration = int.TryParse(Environment.GetEnvironmentVariable("TEST_DURATION"), out int td) ? td : 30000
             };
 
-            Directory.CreateDirectory(config.OutputDir);
+            if (!Directory.Exists(config.OutputDir))
+                Directory.CreateDirectory(config.OutputDir);
 
             var options = new FirefoxOptions();
             options.AddArgument("--headless");
@@ -126,10 +138,35 @@ namespace GeneralPerformanceMeasurement
             };
 
             var fileName = $"{config.Environment}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.json";
-            File.WriteAllText(
-                Path.Combine(config.OutputDir, fileName),
-                JsonConvert.SerializeObject(result, Formatting.Indented)
-            );
+            var resultJson = JsonConvert.SerializeObject(result, Formatting.Indented);
+            
+            File.WriteAllText(Path.Combine(config.OutputDir, fileName), resultJson);
+            
+            if (config.OutputDir != "./docker-actions" && config.Environment == "docker") {
+                File.WriteAllText(Path.Combine("./docker-actions", fileName), resultJson);
+            }
+            if (config.OutputDir != "./vm-actions" && config.Environment == "vm") {
+                File.WriteAllText(Path.Combine("./vm-actions", fileName), resultJson);
+            }
+        }
+
+        private static void CreateInitialJsonIfNeeded(string directory)
+        {
+            if (!Directory.GetFiles(directory, "*.json").Any())
+            {
+                var initialData = new
+                {
+                    TestEnvironment = Path.GetFileName(directory).Replace("-actions", ""),
+                    Timestamp = DateTime.UtcNow,
+                    IsInitialFile = true,
+                    Note = "This is an automatically generated placeholder file"
+                };
+                
+                File.WriteAllText(
+                    Path.Combine(directory, $"initial-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.json"),
+                    JsonConvert.SerializeObject(initialData, Formatting.Indented)
+                );
+            }
         }
     }
 }
