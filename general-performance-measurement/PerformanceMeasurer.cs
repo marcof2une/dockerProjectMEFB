@@ -6,20 +6,15 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.Support.UI;
+using Newtonsoft.Json.Linq;
 using GeneralPerformanceMeasurement.Models;
-using GeneralPerformanceMeasurement;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Collections.ObjectModel;
 
 namespace GeneralPerformanceMeasurement
 {
     public class PerformanceMeasurer
     {
-        public static async Task Main(string[] args)
+        public static async Task RunAsync(string[] args)
         {
             if (!Directory.Exists("./docker-actions"))
                 Directory.CreateDirectory("./docker-actions");
@@ -30,13 +25,28 @@ namespace GeneralPerformanceMeasurement
             CreateInitialJsonIfNeeded("./docker-actions");
             CreateInitialJsonIfNeeded("./vm-actions");
 
-            // Fix: Use args[1] instead of args[0] to get the environment
+            // Get environment from args
             var environment = args.Length > 1 ? args[1] : "docker";
             var outputDir = environment == "docker" ? "./docker-actions" : "./vm-actions";
-            
+
+            string containerId = "";
+            if (args.Length > 2)
+            {
+                containerId = args[2];
+            }
+            else if (environment == "docker")
+            {
+                Console.WriteLine("Enter Docker container ID or name to monitor:");
+                if (containerId == "")
+                {
+                    Console.WriteLine("Container ID cannot be empty. Exiting.");
+                    return;
+                }
+            }
+
             var config = new
             {
-                Url = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:3000",
+                ContainerId = containerId,
                 Environment = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? environment,
                 OutputDir = Environment.GetEnvironmentVariable("OUTPUT_DIR") ?? outputDir,
                 TestDuration = int.TryParse(Environment.GetEnvironmentVariable("TEST_DURATION"), out int td) ? td : 30000
@@ -45,109 +55,163 @@ namespace GeneralPerformanceMeasurement
             if (!Directory.Exists(config.OutputDir))
                 Directory.CreateDirectory(config.OutputDir);
 
-            var options = new FirefoxOptions();
-            options.AddArgument("--headless");
-
-            using var driver = new FirefoxDriver(options);
-            driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(120);
-
-            driver.Navigate().GoToUrl(config.Url);
-
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait.Until(d => d != null && 
-                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState")?.Equals("complete") == true);
-
-            // Inject FPS tracking code
-            ((IJavaScriptExecutor)driver).ExecuteScript(@"
-                window.fpsValues = [];
-                let lastFrameTimestamp = performance.now();
-                function calculateFPS() {
-                    const now = performance.now();
-                    const fps = 1000 / (now - lastFrameTimestamp);
-                    if(fps < 120) window.fpsValues.push(fps);
-                    lastFrameTimestamp = now;
-                    requestAnimationFrame(calculateFPS);
-                }
-                requestAnimationFrame(calculateFPS);
-            ");
-
-            var metrics = new List<Metric>();
+            Console.WriteLine($"Starting performance measurement in {config.Environment} environment");
+            Console.WriteLine($"Test duration: {config.TestDuration / 1000} seconds");
+            
+            if (environment == "docker" && !string.IsNullOrEmpty(config.ContainerId))
+            {
+                Console.WriteLine($"Monitoring Docker container: {config.ContainerId}");
+                await MeasureDockerPerformance(config);
+            }
+            else
+            {
+                Console.WriteLine("Measuring system performance");
+                await MeasureSystemPerformance(config);
+            }
+        }
+        
+        private static async Task MeasureDockerPerformance(dynamic config)
+        {
+            var dockerMonitor = new DockerMonitor();
+            var metrics = new List<DockerMetrics>();
             var startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
+            
+            Console.WriteLine("Collecting Docker stats...");
+            
+            // Collect metrics at regular intervals
             for (int i = 0; i < config.TestDuration / 1000; i++)
             {
-                var jsHeapSize = Convert.ToInt64(((IJavaScriptExecutor)driver).ExecuteScript(
-                    "return window.performance.memory ? window.performance.memory.usedJSHeapSize : 0"));
-
-                var scriptExecutionTime = Convert.ToDouble(((IJavaScriptExecutor)driver).ExecuteScript(@"
-                    const entries = performance.getEntriesByType('measure');
-                    let total = 0;
-                    for (const entry of entries) {
-                        total += entry.duration;
-                    }
-                    performance.clearMeasures();
-                    return total;
-                "));
+                var dockerMetrics = dockerMonitor.GetContainerStats(config.ContainerId);
+                metrics.Add(dockerMetrics);
                 
-                metrics.Add(new Metric 
-                {
-                    Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startTime,
-                    ScriptDuration = scriptExecutionTime,
-                    JSHeapUsedSize = jsHeapSize
-                });
+                Console.WriteLine($"[{i+1}/{config.TestDuration/1000}] CPU: {dockerMetrics.CpuUsage}%, Memory: {dockerMetrics.MemoryUsage}%");
                 
                 await Task.Delay(1000);
             }
-
+            
+            // Calculate averages
+            var avgCpu = metrics.Average(m => m.CpuUsage);
+            var avgMemory = metrics.Average(m => m.MemoryUsage);
+            var minCpu = metrics.Min(m => m.CpuUsage);
+            var maxCpu = metrics.Max(m => m.CpuUsage);
+            var minMemory = metrics.Min(m => m.MemoryUsage);
+            var maxMemory = metrics.Max(m => m.MemoryUsage);
+            
+            // Get additional system metrics
             var systemMonitor = new Models.GeneralPerformanceMeasurement.Monitors.SystemMonitor();
-
             var systemMetrics = systemMonitor.GetMetrics();
-
-            var fpsValuesArray = ((IJavaScriptExecutor)driver).ExecuteScript("return window.fpsValues") 
-                as IReadOnlyCollection<object>;
-                
-            List<double> fpsValues = new List<double>();
-            if (fpsValuesArray != null)
-            {
-                fpsValues = fpsValuesArray.Select(v => Convert.ToDouble(v)).ToList();
-            }
-
+            
+            // Create result object
             var result = new PerformanceResult
             {
                 TestEnvironment = config.Environment,
                 Timestamp = DateTime.UtcNow,
-                Url = config.Url,
                 TestDuration = config.TestDuration,
-                Metrics = metrics,
-                FpsStats = fpsValues.Any() 
-                    ? new FpsStats
-                    {
-                        Values = fpsValues,
-                        Average = fpsValues.Average(),
-                        Min = fpsValues.Min(),
-                        Max = fpsValues.Max()
-                    } 
-                    : new FpsStats
-                    {
-                        Values = new List<double>(),
-                        Average = 0,
-                        Min = 0,
-                        Max = 0
-                    },
-                SystemMetrics = systemMetrics
+                Metrics = metrics.Select(m => new Metric 
+                {
+                    Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startTime,
+                    ScriptDuration = 0, // Not applicable for Docker
+                    JSHeapUsedSize = 0  // Not applicable for Docker
+                }).ToList(),
+                FpsStats = new FpsStats // Not applicable for Docker, but keeping structure
+                {
+                    Values = new List<double>(),
+                    Average = 0,
+                    Min = 0,
+                    Max = 0
+                },
+                SystemMetrics = new SystemResourceMetrics
+                {
+                    CpuUsage = avgCpu,
+                    MemoryUsage = avgMemory
+                }
             };
-
+            
+            // Add docker-specific properties using dynamic
+            var resultObj = JObject.FromObject(result);
+            resultObj["DockerMetrics"] = JObject.FromObject(new {
+                AverageCpu = avgCpu,
+                AverageMemory = avgMemory,
+                MinCpu = minCpu,
+                MaxCpu = maxCpu,
+                MinMemory = minMemory,
+                MaxMemory = maxMemory,
+                ContainerId = config.ContainerId
+            });
+            
+            // Save result
             var fileName = $"{config.Environment}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.json";
-            var resultJson = JsonConvert.SerializeObject(result, Formatting.Indented);
+            var resultJson = resultObj.ToString(Formatting.Indented);
             
             File.WriteAllText(Path.Combine(config.OutputDir, fileName), resultJson);
             
             if (config.OutputDir != "./docker-actions" && config.Environment == "docker") {
                 File.WriteAllText(Path.Combine("./docker-actions", fileName), resultJson);
             }
+            
+            Console.WriteLine($"Docker performance data saved to {Path.Combine(config.OutputDir, fileName)}");
+        }
+        
+        private static async Task MeasureSystemPerformance(dynamic config)
+        {
+            var systemMonitor = new Models.GeneralPerformanceMeasurement.Monitors.SystemMonitor();
+            var metrics = new List<SystemMetrics>();
+            var startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            
+            Console.WriteLine("Collecting system stats...");
+            
+            // Collect metrics at regular intervals
+            for (int i = 0; i < config.TestDuration / 1000; i++)
+            {
+                var sysMetrics = systemMonitor.GetMetrics();
+                metrics.Add(sysMetrics);
+                
+                Console.WriteLine($"[{i+1}/{config.TestDuration/1000}] CPU: {sysMetrics.CpuUsage}%, Memory: {sysMetrics.MemoryUsage}%");
+                
+                await Task.Delay(1000);
+            }
+            
+            // Calculate averages
+            var avgCpu = metrics.Average(m => m.CpuUsage);
+            var avgMemory = metrics.Average(m => m.MemoryUsage);
+            
+            // Create result object
+            var result = new PerformanceResult
+            {
+                TestEnvironment = config.Environment,
+                Timestamp = DateTime.UtcNow,
+                TestDuration = config.TestDuration,
+                Metrics = metrics.Select((m, i) => new Metric 
+                {
+                    Timestamp = i * 1000,
+                    ScriptDuration = 0, // Not applicable for system metrics
+                    JSHeapUsedSize = 0  // Not applicable for system metrics
+                }).ToList(),
+                FpsStats = new FpsStats // Not applicable for system metrics, but keeping structure
+                {
+                    Values = new List<double>(),
+                    Average = 0,
+                    Min = 0,
+                    Max = 0
+                },
+                SystemMetrics = new SystemResourceMetrics
+                {
+                    CpuUsage = avgCpu,
+                    MemoryUsage = avgMemory
+                }
+            };
+            
+            // Save result
+            var fileName = $"{config.Environment}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.json";
+            var resultJson = JsonConvert.SerializeObject(result, Formatting.Indented);
+            
+            File.WriteAllText(Path.Combine(config.OutputDir, fileName), resultJson);
+            
             if (config.OutputDir != "./vm-actions" && config.Environment == "vm") {
                 File.WriteAllText(Path.Combine("./vm-actions", fileName), resultJson);
             }
+            
+            Console.WriteLine($"System performance data saved to {Path.Combine(config.OutputDir, fileName)}");
         }
 
         private static void CreateInitialJsonIfNeeded(string directory)
