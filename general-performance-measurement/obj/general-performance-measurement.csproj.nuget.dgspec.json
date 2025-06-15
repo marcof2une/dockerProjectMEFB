@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/mefb-deb-virt/dev/dockerProjectMEFB/general-performance-measurement/general-performance-measurement.csproj": {}
+    "/home/marcof2/dev/TIC/dockerP/general-performance-measurement/general-performance-measurement.csproj": {}
   },
   "projects": {
-    "/home/mefb-deb-virt/dev/dockerProjectMEFB/general-performance-measurement/general-performance-measurement.csproj": {
+    "/home/marcof2/dev/TIC/dockerP/general-performance-measurement/general-performance-measurement.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/mefb-deb-virt/dev/dockerProjectMEFB/general-performance-measurement/general-performance-measurement.csproj",
+        "projectUniqueName": "/home/marcof2/dev/TIC/dockerP/general-performance-measurement/general-performance-measurement.csproj",
         "projectName": "general-performance-measurement",
-        "projectPath": "/home/mefb-deb-virt/dev/dockerProjectMEFB/general-performance-measurement/general-performance-measurement.csproj",
-        "packagesPath": "/home/mefb-deb-virt/.nuget/packages/",
-        "outputPath": "/home/mefb-deb-virt/dev/dockerProjectMEFB/general-performance-measurement/obj/",
+        "projectPath": "/home/marcof2/dev/TIC/dockerP/general-performance-measurement/general-performance-measurement.csproj",
+        "packagesPath": "/home/marcof2/.nuget/packages/",
+        "outputPath": "/home/marcof2/dev/TIC/dockerP/general-performance-measurement/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/mefb-deb-virt/.nuget/NuGet/NuGet.Config"
+          "/home/marcof2/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -32,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -72,7 +67,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.410/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.116/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

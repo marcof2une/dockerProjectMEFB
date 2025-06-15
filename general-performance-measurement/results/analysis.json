@@ -1,0 +1,17 @@
+{
+  "Docker": {
+    "AverageFps": 0.0,
+    "AverageCpu": 0.05150000000000002,
+    "AverageMemory": 0.65
+  },
+  "VM": {
+    "AverageFps": 0.0,
+    "AverageCpu": 3.04,
+    "AverageMemory": 25.27333333333333
+  },
+  "Comparison VM vrs Docker": {
+    "FpsDifference": 0.0,
+    "CpuDifference": -98.31,
+    "MemoryDifference": -97.43
+  }
+}

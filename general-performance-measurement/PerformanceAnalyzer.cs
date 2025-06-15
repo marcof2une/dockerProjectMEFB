@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using GeneralPerformanceMeasurement.Models;
 
@@ -65,11 +66,24 @@ namespace GeneralPerformanceMeasurement.Analysis
                         var result = JsonConvert.DeserializeObject<PerformanceResult>(File.ReadAllText(file));
                         if (result != null &&
                             result.FpsStats != null &&
-                            result.FpsStats.Values != null &&
                             result.SystemMetrics != null)
                         {
-                            // Calculate average FPS if not already set
-                            result.FpsStats.Average = result.FpsStats.Values.Average();
+                            // Skip initial placeholder files
+                            if (JObject.Parse(File.ReadAllText(file)).ContainsKey("IsInitialFile"))
+                            {
+                                continue;
+                            }
+                            
+                            // Calculate average FPS if not already set and there are values
+                            if (result.FpsStats.Values != null && result.FpsStats.Values.Any())
+                            {
+                                result.FpsStats.Average = result.FpsStats.Values.Average();
+                            }
+                            else
+                            {
+                                // Set to 0 or the already existing average if Values is empty
+                                result.FpsStats.Average = result.FpsStats.Average;
+                            }
 
                             // Add to the list if valid
                             dataPoints.Add(result);
@@ -87,6 +101,7 @@ namespace GeneralPerformanceMeasurement.Analysis
                     return null;
                 }
 
+                // Safe average calculations with default values
                 return (
                     dataPoints.Average(r => r.FpsStats?.Average ?? 0),
                     dataPoints.Average(r => r.SystemMetrics?.CpuUsage ?? 0),
