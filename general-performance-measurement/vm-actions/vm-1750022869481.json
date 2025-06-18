@@ -1,0 +1,168 @@
+{
+  "TestEnvironment": "vm",
+  "Timestamp": "2025-06-15T21:27:49.4802007Z",
+  "Url": "",
+  "TestDuration": 30000,
+  "Metrics": [
+    {
+      "Timestamp": 0,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 1000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 2000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 3000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 4000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 5000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 6000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 7000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 8000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 9000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 10000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 11000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 12000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 13000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 14000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 15000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 16000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 17000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 18000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 19000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 20000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 21000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 22000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 23000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 24000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 25000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 26000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 27000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 28000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 29000,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    }
+  ],
+  "FpsStats": {
+    "Values": [],
+    "Average": 0.0,
+    "Min": 0.0,
+    "Max": 0.0
+  },
+  "SystemMetrics": {
+    "CpuUsage": 0.4636666666666669,
+    "MemoryUsage": 25.318666666666665
+  }
+}
