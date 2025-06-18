@@ -1,0 +1,177 @@
+{
+  "TestEnvironment": "docker",
+  "Timestamp": "2025-06-18T03:44:19.6858129Z",
+  "Url": "",
+  "TestDuration": 30000,
+  "Metrics": [
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    },
+    {
+      "Timestamp": 76238,
+      "ScriptDuration": 0.0,
+      "JSHeapUsedSize": 0
+    }
+  ],
+  "FpsStats": {
+    "Values": [],
+    "Average": 0.0,
+    "Min": 0.0,
+    "Max": 0.0
+  },
+  "SystemMetrics": {
+    "CpuUsage": 0.055666666666666705,
+    "MemoryUsage": 0.5700000000000002
+  },
+  "DockerMetrics": {
+    "AverageCpu": 0.055666666666666705,
+    "AverageMemory": 0.5700000000000002,
+    "MinCpu": 0.03,
+    "MaxCpu": 0.14,
+    "MinMemory": 0.57,
+    "MaxMemory": 0.57,
+    "ContainerId": "d5d609ad9e4d"
+  }
+}
