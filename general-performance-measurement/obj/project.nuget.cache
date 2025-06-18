@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "iQ8KBk4SfWc=",
+  "dgSpecHash": "kSS1o2fU1itjRy4Fjb6bCXazhoiYONLANlEu2q1SCssC4k3vBff76su1FQtE+1q5+KGz+3fo5bOHbftBX8MvsQ==",
   "success": true,
-  "projectFilePath": "/home/mefb-deb-virt/dev/dockerProjectMEFB/general-performance-measurement/general-performance-measurement.csproj",
+  "projectFilePath": "/home/marcof2/dev/TIC/dockerP/general-performance-measurement/general-performance-measurement.csproj",
   "expectedPackageFiles": [
-    "/home/mefb-deb-virt/.nuget/packages/microsoft.win32.systemevents/7.0.0/microsoft.win32.systemevents.7.0.0.nupkg.sha512",
-    "/home/mefb-deb-virt/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
-    "/home/mefb-deb-virt/.nuget/packages/selenium.support/4.15.0/selenium.support.4.15.0.nupkg.sha512",
-    "/home/mefb-deb-virt/.nuget/packages/selenium.webdriver/4.15.0/selenium.webdriver.4.15.0.nupkg.sha512",
-    "/home/mefb-deb-virt/.nuget/packages/system.drawing.common/7.0.0/system.drawing.common.7.0.0.nupkg.sha512"
+    "/home/marcof2/.nuget/packages/microsoft.win32.systemevents/7.0.0/microsoft.win32.systemevents.7.0.0.nupkg.sha512",
+    "/home/marcof2/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
+    "/home/marcof2/.nuget/packages/selenium.support/4.15.0/selenium.support.4.15.0.nupkg.sha512",
+    "/home/marcof2/.nuget/packages/selenium.webdriver/4.15.0/selenium.webdriver.4.15.0.nupkg.sha512",
+    "/home/marcof2/.nuget/packages/system.drawing.common/7.0.0/system.drawing.common.7.0.0.nupkg.sha512"
   ],
   "logs": []
 }

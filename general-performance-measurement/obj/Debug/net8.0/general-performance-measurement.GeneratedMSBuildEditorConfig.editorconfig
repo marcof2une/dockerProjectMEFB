@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = general_performance_measurement
-build_property.ProjectDir = /home/mefb-deb-virt/dev/dockerProjectMEFB/general-performance-measurement/
+build_property.ProjectDir = /home/marcof2/dev/TIC/dockerP/general-performance-measurement/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
